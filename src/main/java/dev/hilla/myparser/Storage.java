@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public final class Storage {
+public class Storage {
 
     private final Set<Class<?>> types;
     private final Set<Method> methods;
@@ -20,10 +20,6 @@ public final class Storage {
         types = new HashSet<>();
         methods = new HashSet<>();
         this.plugins = Arrays.asList(plugins);
-
-        for (Plugin plugin : plugins) {
-            plugin.setStorage(this);
-        }
     }
 
     /**
@@ -35,7 +31,7 @@ public final class Storage {
                 break;
             }
 
-            method = plugin.addingMethod(method);
+            method = plugin.process(method, this);
         }
 
         return method;
@@ -50,7 +46,7 @@ public final class Storage {
                 break;
             }
 
-            type = plugin.addingType(type);
+            type = plugin.process(type, this);
         }
 
         return type;
@@ -106,7 +102,7 @@ public final class Storage {
                 break;
             }
 
-            type = plugin.findingType(type);
+            type = plugin.find(type);
         }
 
         return type;

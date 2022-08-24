@@ -39,12 +39,12 @@ public class MyParserTest {
     public static class ReplacerPlugin implements Plugin {
 
         @Override
-        public Class<?> addingType(Class<?> type) {
+        public Class<?> process(Class<?> type, Storage storage) {
             return map(type);
         }
 
         @Override
-        public Class<?> findingType(Class<?> type) {
+        public Class<?> find(Class<?> type) {
             return map(type);
         }
 

@@ -4,18 +4,25 @@ import java.lang.reflect.Method;
 
 public interface Plugin {
 
-    default void setStorage(Storage storage) {
-    }
-
-    default Method addingMethod(Method method) {
+    /**
+     * Called when a method is being processed.
+     */
+    default Method process(Method method, Storage storage) {
         return method;
     }
 
-    default Class<?> addingType(Class<?> type) {
+    /**
+     * Called when a type is being processed.
+     */
+    default Class<?> process(Class<?> type, Storage storage) {
         return type;
     }
 
-    default Class<?> findingType(Class<?> type) {
+    /**
+     * Called when a type is gonna be found.
+     * The plugin can perform some action to help finding that type.
+     */
+    default Class<?> find(Class<?> type) {
         return type;
     }
 }

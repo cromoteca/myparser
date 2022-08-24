@@ -1,6 +1,7 @@
 package dev.hilla.myparser.plugins;
 
 import dev.hilla.myparser.Plugin;
+import dev.hilla.myparser.Storage;
 import java.lang.reflect.Method;
 
 /**
@@ -9,12 +10,12 @@ import java.lang.reflect.Method;
 public class SkipJavaItems implements Plugin {
 
     @Override
-    public Method addingMethod(Method method) {
+    public Method process(Method method, Storage storage) {
         return method.getDeclaringClass().getName().startsWith("java.") ? null : method;
     }
 
     @Override
-    public Class<?> addingType(Class<?> type) {
+    public Class<?> process(Class<?> type, Storage storage) {
         return type.isPrimitive() || type.getName().startsWith("java.") ? null : type;
     }
 

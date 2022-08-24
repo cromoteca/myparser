@@ -9,20 +9,13 @@ import java.lang.reflect.Method;
  */
 public class AddToStorage implements Plugin {
 
-    private Storage storage;
-
     @Override
-    public void setStorage(Storage storage) {
-        this.storage = storage;
-    }
-
-    @Override
-    public Class<?> addingType(Class<?> type) {
+    public Class<?> process(Class<?> type, Storage storage) {
         return storage.store(type);
     }
 
     @Override
-    public Method addingMethod(Method method) {
+    public Method process(Method method, Storage storage) {
         return storage.store(method);
     }
 }
