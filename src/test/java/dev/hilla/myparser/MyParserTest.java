@@ -1,5 +1,7 @@
 package dev.hilla.myparser;
 
+import dev.hilla.myparser.example.ExampleClientType;
+import dev.hilla.myparser.example.ExampleServerType;
 import dev.hilla.myparser.plugins.AddToStorage;
 import dev.hilla.myparser.plugins.SkipJavaItems;
 import java.beans.BeanInfo;
@@ -15,7 +17,7 @@ public class MyParserTest {
 
     @Test
     public void firstTest() throws Exception {
-        var storage = new Storage(new SkipJavaItems(), new AddToStorage());
+        var storage = new Storage(new ReplacerPlugin(), new SkipJavaItems(), new AddToStorage());
         ClassPathScanningCandidateComponentProvider scanner
                 = new ClassPathScanningCandidateComponentProvider(false);
 
@@ -36,5 +38,14 @@ public class MyParserTest {
         for (Class<?> type : storage.getTypes()) {
             System.out.println(type);
         }
+    }
+
+    public static class ReplacerPlugin implements Plugin {
+
+        @Override
+        public Class<?> addingType(Class<?> type) throws ParserException {
+            return type.equals(ExampleServerType.class) ? ExampleClientType.class : type;
+        }
+
     }
 }

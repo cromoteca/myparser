@@ -2,13 +2,13 @@ package dev.hilla.myparser.example;
 
 public class ExampleEntity extends ExampleBaseEntity {
 
-    private final ExampleType data;
+    private final ExampleServerType data;
 
     public ExampleEntity() {
-        data = new ExampleType(8);
+        data = new ExampleServerType(8);
     }
 
-    public ExampleEntity(ExampleType data) {
+    public ExampleEntity(ExampleServerType data) {
         this.data = data;
     }
 
@@ -22,7 +22,7 @@ public class ExampleEntity extends ExampleBaseEntity {
         return computeImportance();
     }
 
-    public ExampleType getData() {
+    public ExampleServerType getData() {
         return data;
     }
 }

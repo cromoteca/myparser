@@ -4,7 +4,7 @@ public interface ExampleInterface {
 
     String getName();
 
-    ExampleType getExampleObject();
+    ExampleServerType getExampleObject();
 
     default int getImportance() {
         return 0;

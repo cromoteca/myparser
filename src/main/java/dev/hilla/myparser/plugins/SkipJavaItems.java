@@ -5,7 +5,7 @@ import dev.hilla.myparser.Plugin;
 import java.lang.reflect.Method;
 
 /**
- * A plugin to skip default Java items (limites to java.* and primitive types)
+ * A plugin to skip default Java items (limits to java.* and primitive types)
  */
 public class SkipJavaItems implements Plugin {
 
