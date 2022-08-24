@@ -1,7 +1,7 @@
 package dev.hilla.myparser;
 
-import dev.hilla.myparser.example.ExampleClientType;
-import dev.hilla.myparser.example.ExampleServerType;
+import dev.hilla.myparser.example.ExampleClientData;
+import dev.hilla.myparser.example.ExampleServerData;
 import dev.hilla.myparser.plugins.AddToStorage;
 import dev.hilla.myparser.plugins.SkipJavaItems;
 import java.beans.BeanInfo;
@@ -38,13 +38,24 @@ public class MyParserTest {
         for (Class<?> type : storage.getTypes()) {
             System.out.println(type);
         }
+        
+        storage.describeMethods().stream().forEach(System.out::println);
     }
 
     public static class ReplacerPlugin implements Plugin {
 
         @Override
-        public Class<?> addingType(Class<?> type) throws ParserException {
-            return type.equals(ExampleServerType.class) ? ExampleClientType.class : type;
+        public Class<?> addingType(Class<?> type) {
+            return map(type);
+        }
+
+        @Override
+        public Class<?> findingType(Class<?> type) {
+            return map(type);
+        }
+
+        private Class<?> map(Class<?> type) {
+            return type.equals(ExampleServerData.class) ? ExampleClientData.class : type;
         }
 
     }

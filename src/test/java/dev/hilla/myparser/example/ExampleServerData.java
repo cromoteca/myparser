@@ -1,10 +1,10 @@
 package dev.hilla.myparser.example;
 
-public class ExampleTransferType {
+public class ExampleServerData {
 
     public final ExampleEntity value;
 
-    public ExampleTransferType(ExampleEntity value) {
+    public ExampleServerData(ExampleEntity value) {
         this.value = value;
     }
 

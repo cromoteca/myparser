@@ -1,10 +1,10 @@
 package dev.hilla.myparser.example;
 
-public class ExampleClientType {
+public class ExampleType {
 
     private final int value;
 
-    public ExampleClientType(int value) {
+    public ExampleType(int value) {
         this.value = value;
     }
 

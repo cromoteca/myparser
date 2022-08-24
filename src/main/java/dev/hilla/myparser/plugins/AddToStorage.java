@@ -1,6 +1,5 @@
 package dev.hilla.myparser.plugins;
 
-import dev.hilla.myparser.ParserException;
 import dev.hilla.myparser.Plugin;
 import dev.hilla.myparser.Storage;
 import java.lang.reflect.Method;
@@ -18,14 +17,12 @@ public class AddToStorage implements Plugin {
     }
 
     @Override
-    public Class<?> addingType(Class<?> type) throws ParserException {
-        storage.store(type);
-        return type;
+    public Class<?> addingType(Class<?> type) {
+        return storage.store(type);
     }
 
     @Override
-    public Method addingMethod(Method method) throws ParserException {
-        storage.store(method);
-        return method;
+    public Method addingMethod(Method method) {
+        return storage.store(method);
     }
 }

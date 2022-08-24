@@ -15,7 +15,7 @@ public class SkipJavaItems implements Plugin {
     }
 
     @Override
-    public Class<?> addingType(Class<?> type) throws ParserException {
+    public Class<?> addingType(Class<?> type) {
         return type.isPrimitive() || type.getName().startsWith("java.") ? null : type;
     }
 

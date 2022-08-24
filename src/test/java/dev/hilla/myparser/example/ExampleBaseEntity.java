@@ -3,8 +3,8 @@ package dev.hilla.myparser.example;
 public abstract class ExampleBaseEntity implements ExampleInterface {
 
     @Override
-    public ExampleServerType getExampleObject() {
-        return new ExampleServerType(5);
+    public ExampleType getExampleObject() {
+        return new ExampleType(5);
     }
 
     protected int computeImportance() {

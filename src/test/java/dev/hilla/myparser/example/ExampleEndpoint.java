@@ -18,11 +18,10 @@ public class ExampleEndpoint {
         return generateMessage(text);
     }
 
-    public String nullMessage() {
-        return null;
+    public ExampleServerData getData() {
+        return new ExampleServerData(new ExampleEntity());
     }
 
-    public ExampleTransferType getData() {
-        return new ExampleTransferType(new ExampleEntity());
+    public void setData(ExampleServerData data) {
     }
 }

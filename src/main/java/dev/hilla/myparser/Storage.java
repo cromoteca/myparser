@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public final class Storage {
 
@@ -28,7 +29,7 @@ public final class Storage {
     /**
      * Lets plugins process a method.
      */
-    public void process(Method method) throws ParserException {
+    public Method process(Method method) {
         for (Plugin plugin : plugins) {
             if (method == null || methods.contains(method)) {
                 break;
@@ -36,12 +37,14 @@ public final class Storage {
 
             method = plugin.addingMethod(method);
         }
+
+        return method;
     }
 
     /**
      * Lets plugins process a type.
      */
-    public void process(Class<?> type) throws ParserException {
+    public Class<?> process(Class<?> type) {
         for (Plugin plugin : plugins) {
             if (type == null || types.contains(type)) {
                 break;
@@ -49,39 +52,64 @@ public final class Storage {
 
             type = plugin.addingType(type);
         }
+
+        return type;
     }
 
     /**
      * Adds a method to the storage and processes its types.
      */
-    public void store(Method method) throws ParserException {
-        methods.add(method);
+    public Method store(Method method) {
+        if (!methods.contains(method)) {
+            methods.add(method);
 
-        Class<?> returnType = method.getReturnType();
-        process(returnType);
+            Class<?> returnType = method.getReturnType();
+            process(returnType);
 
-        // Process all parameters using reflection
-        for (Class<?> parameterType : method.getParameterTypes()) {
-            process(parameterType);
+            // Process all parameters using reflection
+            for (Class<?> parameterType : method.getParameterTypes()) {
+                process(parameterType);
+            }
         }
+
+        return method;
     }
 
     /**
      * Adds a type to the storage and process its property types.
      */
-    public void store(Class<?> type) throws ParserException {
-        types.add(type);
+    public Class<?> store(Class<?> type) {
+        if (!types.contains(type)) {
+            types.add(type);
 
-        try {
-            var beanInfo = Introspector.getBeanInfo(type);
+            try {
+                var beanInfo = Introspector.getBeanInfo(type);
 
-            // Process all properties using introspection
-            for (PropertyDescriptor descriptor : beanInfo.getPropertyDescriptors()) {
-                process(descriptor.getPropertyType());
+                // Process all properties using introspection
+                for (PropertyDescriptor descriptor : beanInfo.getPropertyDescriptors()) {
+                    process(descriptor.getPropertyType());
+                }
+            } catch (IntrospectionException ex) {
+                throw new ParserException(ex);
             }
-        } catch (IntrospectionException ex) {
-            throw new ParserException(ex);
         }
+
+        return type;
+    }
+
+    /**
+     * Lets plugins find a type.
+     */
+    public Class<?> find(Class<?> type) {
+        for (Plugin plugin : plugins) {
+            if (type == null || types.contains(type)) {
+                break;
+            }
+
+            type = plugin.findingType(type);
+        }
+
+        return type;
     }
 
     public Set<Class<?>> getTypes() {
@@ -90,5 +118,19 @@ public final class Storage {
 
     public Set<Method> getMethods() {
         return methods;
+    }
+
+    public List<String> describeMethods() {
+        return methods.stream().map(method -> {
+            var returnType = find(method.getReturnType()).getSimpleName();
+
+            var paramList = Arrays.stream(method.getParameters()).map(param -> {
+                var type = find(param.getType()).getSimpleName();
+                var name = param.getName();
+                return String.format("%s: %s", name, type);
+            }).collect(Collectors.toList());
+
+            return String.format("%s%s: %s", method.getName(), paramList, returnType);
+        }).collect(Collectors.toList());
     }
 }
