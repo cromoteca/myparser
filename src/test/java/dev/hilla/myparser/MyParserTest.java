@@ -7,7 +7,6 @@ import dev.hilla.myparser.plugins.SkipJavaItems;
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.MethodDescriptor;
-import java.lang.reflect.Method;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
@@ -31,14 +30,11 @@ public class MyParserTest {
             }
         }
 
-        for (Method method : storage.getMethods()) {
-            System.out.println(method);
-        }
-
-        for (Class<?> type : storage.getTypes()) {
-            System.out.println(type);
-        }
-        
+        System.out.println("\nOriginal methods:");
+        storage.getMethods().stream().forEach(System.out::println);
+        System.out.println("\nNeeded types:");
+        storage.getTypes().stream().forEach(System.out::println);
+        System.out.println("\nEndpoint methods:");
         storage.describeMethods().stream().forEach(System.out::println);
     }
 

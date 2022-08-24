@@ -14,7 +14,7 @@ public interface Plugin {
     default Class<?> addingType(Class<?> type) {
         return type;
     }
-    
+
     default Class<?> findingType(Class<?> type) {
         return type;
     }
