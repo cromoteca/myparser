@@ -133,4 +133,24 @@ public final class Storage {
             return String.format("%s%s: %s", method.getName(), paramList, returnType);
         }).collect(Collectors.toList());
     }
+
+    public List<String> describeTypes() {
+        return types.stream().map(type -> {
+            try {
+                var beanInfo = Introspector.getBeanInfo(type);
+
+                var propList = Arrays.stream(beanInfo.getPropertyDescriptors())
+                        .filter(prop -> !prop.getReadMethod().getDeclaringClass().equals(Object.class))
+                        .map(prop -> {
+                            var propType = prop.getPropertyType().getSimpleName();
+                            var name = prop.getName();
+                            return String.format("%s: %s", name, propType);
+                        }).collect(Collectors.toList());
+
+                return String.format("%s%s", type.getSimpleName(), propList);
+            } catch (IntrospectionException ex) {
+                throw new ParserException(ex);
+            }
+        }).collect(Collectors.toList());
+    }
 }

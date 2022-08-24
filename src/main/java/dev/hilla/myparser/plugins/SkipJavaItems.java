@@ -1,6 +1,5 @@
 package dev.hilla.myparser.plugins;
 
-import dev.hilla.myparser.ParserException;
 import dev.hilla.myparser.Plugin;
 import java.lang.reflect.Method;
 

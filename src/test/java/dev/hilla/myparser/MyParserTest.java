@@ -30,12 +30,10 @@ public class MyParserTest {
             }
         }
 
-        System.out.println("\nOriginal methods:");
-        storage.getMethods().stream().forEach(System.out::println);
-        System.out.println("\nNeeded types:");
-        storage.getTypes().stream().forEach(System.out::println);
-        System.out.println("\nEndpoint methods:");
+        System.out.println("\nMethods to generate:");
         storage.describeMethods().stream().forEach(System.out::println);
+        System.out.println("\nTypes to generate:");
+        storage.describeTypes().stream().forEach(System.out::println);
     }
 
     public static class ReplacerPlugin implements Plugin {
