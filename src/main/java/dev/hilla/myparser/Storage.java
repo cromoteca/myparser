@@ -25,7 +25,10 @@ public final class Storage {
         }
     }
 
-    public void add(Method method) throws ParserException {
+    /**
+     * Lets plugins process a method.
+     */
+    public void process(Method method) throws ParserException {
         for (Plugin plugin : plugins) {
             if (method == null || methods.contains(method)) {
                 break;
@@ -35,7 +38,10 @@ public final class Storage {
         }
     }
 
-    public void add(Class<?> type) throws ParserException {
+    /**
+     * Lets plugins process a type.
+     */
+    public void process(Class<?> type) throws ParserException {
         for (Plugin plugin : plugins) {
             if (type == null || types.contains(type)) {
                 break;
@@ -45,25 +51,33 @@ public final class Storage {
         }
     }
 
+    /**
+     * Adds a method to the storage and processes its types.
+     */
     public void store(Method method) throws ParserException {
         methods.add(method);
 
         Class<?> returnType = method.getReturnType();
-        add(returnType);
+        process(returnType);
 
+        // Process all parameters using reflection
         for (Class<?> parameterType : method.getParameterTypes()) {
-            add(parameterType);
+            process(parameterType);
         }
     }
 
+    /**
+     * Adds a type to the storage and process its property types.
+     */
     public void store(Class<?> type) throws ParserException {
         types.add(type);
 
         try {
             var beanInfo = Introspector.getBeanInfo(type);
 
+            // Process all properties using introspection
             for (PropertyDescriptor descriptor : beanInfo.getPropertyDescriptors()) {
-                add(descriptor.getPropertyType());
+                process(descriptor.getPropertyType());
             }
         } catch (IntrospectionException ex) {
             throw new ParserException(ex);

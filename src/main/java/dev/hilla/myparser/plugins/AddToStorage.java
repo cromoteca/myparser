@@ -5,6 +5,9 @@ import dev.hilla.myparser.Plugin;
 import dev.hilla.myparser.Storage;
 import java.lang.reflect.Method;
 
+/**
+ * A plugin to do the action of actually storing stuff.
+ */
 public class AddToStorage implements Plugin {
 
     private Storage storage;

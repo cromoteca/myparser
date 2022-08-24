@@ -25,7 +25,7 @@ public class MyParserTest {
             BeanInfo bi = Introspector.getBeanInfo(Class.forName(bd.getBeanClassName()));
 
             for (MethodDescriptor md : bi.getMethodDescriptors()) {
-                storage.add(md.getMethod());
+                storage.process(md.getMethod());
             }
         }
 
