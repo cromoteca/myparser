@@ -1,2 +1,3 @@
-# myparser
-A POC about using good old introspection and plugin chains
+A POC about using good old introspection and plugin chains.
+
+See `MyParserTest.java` for usage.
