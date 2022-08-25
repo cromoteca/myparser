@@ -1,17 +1,21 @@
 package dev.hilla.myparser;
 
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class Storage {
 
+    private static final ObjectMapper MAPPER = new ObjectMapper();
+
+    /* uncomment to switch to field mapping
+    static {
+        MAPPER.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
+        MAPPER.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+    } */
     private final Set<Class<?>> types;
     private final Set<Method> methods;
     private final List<Plugin> plugins;
@@ -26,7 +30,7 @@ public class Storage {
      * Lets plugins process a method.
      */
     public Method process(Method method) {
-        for (Plugin plugin : plugins) {
+        for (var plugin : plugins) {
             if (method == null || methods.contains(method)) {
                 break;
             }
@@ -41,7 +45,7 @@ public class Storage {
      * Lets plugins process a type.
      */
     public Class<?> process(Class<?> type) {
-        for (Plugin plugin : plugins) {
+        for (var plugin : plugins) {
             if (type == null || types.contains(type)) {
                 break;
             }
@@ -59,13 +63,10 @@ public class Storage {
         if (!methods.contains(method)) {
             methods.add(method);
 
-            Class<?> returnType = method.getReturnType();
-            process(returnType);
+            process(method.getReturnType());
 
             // Process all parameters using reflection
-            for (Class<?> parameterType : method.getParameterTypes()) {
-                process(parameterType);
-            }
+            Arrays.stream(method.getParameterTypes()).forEach(this::process);
         }
 
         return method;
@@ -78,15 +79,12 @@ public class Storage {
         if (!types.contains(type)) {
             types.add(type);
 
-            try {
-                var beanInfo = Introspector.getBeanInfo(type);
+            var javaType = MAPPER.getTypeFactory().constructType(type);
+            var beanDescription = MAPPER.getSerializationConfig().introspect(javaType);
+            var properties = beanDescription.findProperties();
 
-                // Process all properties using introspection
-                for (PropertyDescriptor descriptor : beanInfo.getPropertyDescriptors()) {
-                    process(descriptor.getPropertyType());
-                }
-            } catch (IntrospectionException ex) {
-                throw new ParserException(ex);
+            for (var property : properties) {
+                process(property.getRawPrimaryType());
             }
         }
 
@@ -97,7 +95,7 @@ public class Storage {
      * Lets plugins find a type.
      */
     public Class<?> find(Class<?> type) {
-        for (Plugin plugin : plugins) {
+        for (var plugin : plugins) {
             if (type == null || types.contains(type)) {
                 break;
             }
@@ -124,29 +122,25 @@ public class Storage {
                 var type = find(param.getType()).getSimpleName();
                 var name = param.getName();
                 return String.format("%s: %s", name, type);
-            }).collect(Collectors.toList());
+            }).toList();
 
             return String.format("%s%s: %s", method.getName(), paramList, returnType);
-        }).collect(Collectors.toList());
+        }).sorted().toList();
     }
 
     public List<String> describeTypes() {
         return types.stream().map(type -> {
-            try {
-                var beanInfo = Introspector.getBeanInfo(type);
+            var javaType = MAPPER.getTypeFactory().constructType(type);
+            var beanDescription = MAPPER.getSerializationConfig().introspect(javaType);
 
-                var propList = Arrays.stream(beanInfo.getPropertyDescriptors())
-                        .filter(prop -> !prop.getReadMethod().getDeclaringClass().equals(Object.class))
-                        .map(prop -> {
-                            var propType = prop.getPropertyType().getSimpleName();
-                            var name = prop.getName();
-                            return String.format("%s: %s", name, propType);
-                        }).collect(Collectors.toList());
+            var propList = beanDescription.findProperties().stream()
+                    .map(prop -> {
+                        var propType = prop.getRawPrimaryType().getSimpleName();
+                        var name = prop.getName();
+                        return String.format("%s: %s", name, propType);
+                    }).sorted().toList();
 
-                return String.format("%s%s", type.getSimpleName(), propList);
-            } catch (IntrospectionException ex) {
-                throw new ParserException(ex);
-            }
-        }).collect(Collectors.toList());
+            return String.format("%s%s", type.getSimpleName(), propList);
+        }).sorted().toList();
     }
 }

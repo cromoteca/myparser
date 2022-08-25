@@ -4,9 +4,8 @@ import dev.hilla.myparser.example.ExampleClientData;
 import dev.hilla.myparser.example.ExampleServerData;
 import dev.hilla.myparser.plugins.AddToStorage;
 import dev.hilla.myparser.plugins.SkipJavaItems;
-import java.beans.BeanInfo;
-import java.beans.Introspector;
-import java.beans.MethodDescriptor;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
@@ -23,11 +22,10 @@ public class MyParserTest {
         scanner.addIncludeFilter(new AnnotationTypeFilter(Endpoint.class));
 
         for (BeanDefinition bd : scanner.findCandidateComponents(getClass().getPackageName())) {
-            BeanInfo bi = Introspector.getBeanInfo(Class.forName(bd.getBeanClassName()));
-
-            for (MethodDescriptor md : bi.getMethodDescriptors()) {
-                storage.process(md.getMethod());
-            }
+            Class<?> endpoint = Class.forName(bd.getBeanClassName());
+            Arrays.stream(endpoint.getMethods())
+                    .filter(m -> (m.getModifiers() & Modifier.PUBLIC) != 0)
+                    .forEach(storage::process);
         }
 
         System.out.println("\nMethods to generate:");

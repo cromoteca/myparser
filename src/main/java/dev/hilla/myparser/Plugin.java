@@ -19,8 +19,8 @@ public interface Plugin {
     }
 
     /**
-     * Called when a type is gonna be found.
-     * The plugin can perform some action to help finding that type.
+     * Called when a type is gonna be found. The plugin can perform some action
+     * to help finding that type.
      */
     default Class<?> find(Class<?> type) {
         return type;

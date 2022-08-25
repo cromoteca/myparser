@@ -2,13 +2,15 @@ package dev.hilla.myparser.example;
 
 public class ExampleType {
 
-    private final int value;
+    // Use a field name that is different from the property name
+    private final int negativeValue;
 
+    // Alter the stored value in getter and setter
     public ExampleType(int value) {
-        this.value = value;
+        this.negativeValue = -value;
     }
 
     public int getValue() {
-        return value;
+        return -negativeValue;
     }
 }
