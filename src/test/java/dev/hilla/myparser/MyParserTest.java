@@ -1,11 +1,16 @@
 package dev.hilla.myparser;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.hilla.myparser.example.ExampleClientData;
 import dev.hilla.myparser.example.ExampleServerData;
 import dev.hilla.myparser.plugins.AddToStorage;
 import dev.hilla.myparser.plugins.SkipJavaItems;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
+import java.util.List;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
@@ -13,25 +18,66 @@ import org.springframework.core.type.filter.AnnotationTypeFilter;
 
 public class MyParserTest {
 
+    private static final List<String> EXPECTED_METHODS = List.of(
+            "add[n1: ExampleType, n2: ExampleType]: ExampleType",
+            "customMessage[text: String]: String",
+            "defaultMessage[]: String",
+            "getData[]: ExampleClientData",
+            "setData[data: ExampleClientData]: void"
+    );
+
     @Test
-    public void firstTest() throws Exception {
-        var storage = new Storage(new ReplacerPlugin(), new SkipJavaItems(), new AddToStorage());
-        ClassPathScanningCandidateComponentProvider scanner
-                = new ClassPathScanningCandidateComponentProvider(false);
+    public void testParseUsingDefaultJacksonConfiguration() throws Exception {
+        testWithObjectMapper(null, EXPECTED_METHODS, List.of(
+                "ExampleClientData[value: ExampleEntity]",
+                "ExampleEntity[data: ExampleType, exampleObject: ExampleType, importance: int, name: String]",
+                "ExampleType[value: int]"
+        ));
+    }
 
-        scanner.addIncludeFilter(new AnnotationTypeFilter(Endpoint.class));
+    @Test
+    public void testParseUsingFields() throws Exception {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
+        mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
+        testWithObjectMapper(mapper, EXPECTED_METHODS, List.of(
+                "ExampleClientData[value: ExampleEntity]",
+                "ExampleEntity[data: ExampleType]",
+                "ExampleType[negativeValue: Integer]"
+        ));
+    }
 
-        for (BeanDefinition bd : scanner.findCandidateComponents(getClass().getPackageName())) {
-            Class<?> endpoint = Class.forName(bd.getBeanClassName());
-            Arrays.stream(endpoint.getMethods())
-                    .filter(m -> (m.getModifiers() & Modifier.PUBLIC) != 0)
-                    .forEach(storage::process);
+    private void testWithObjectMapper(ObjectMapper mapper, List<String> expectedMethods,
+            List<String> expectedTypes) throws Exception {
+        var storage = new Storage(
+                new ReplacerPlugin(),
+                new SkipJavaItems(),
+                new AddToStorage()
+        );
+
+        if (mapper != null) {
+            storage.setMapper(mapper);
         }
 
-        System.out.println("\nMethods to generate:");
-        storage.describeMethods().stream().forEach(System.out::println);
-        System.out.println("\nTypes to generate:");
-        storage.describeTypes().stream().forEach(System.out::println);
+        var scanner = new ClassPathScanningCandidateComponentProvider(false);
+        scanner.addIncludeFilter(new AnnotationTypeFilter(Endpoint.class));
+
+        scanner.findCandidateComponents(getClass().getPackageName()).stream()
+                .map(this::getClassFromBeanDefinition)
+                .flatMap(c -> Arrays.stream(c.getMethods()))
+                .filter(m -> (m.getModifiers() & Modifier.PUBLIC) != 0)
+                .forEach(storage::process);
+
+        Assertions.assertEquals(expectedMethods, storage.describeMethods());
+        Assertions.assertEquals(expectedTypes, storage.describeTypes());
+    }
+
+    private Class<?> getClassFromBeanDefinition(BeanDefinition bd) {
+        try {
+            return Class.forName(bd.getBeanClassName());
+        } catch (ClassNotFoundException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     public static class ReplacerPlugin implements Plugin {

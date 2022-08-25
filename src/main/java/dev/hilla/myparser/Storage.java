@@ -1,6 +1,7 @@
 package dev.hilla.myparser;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -9,13 +10,8 @@ import java.util.Set;
 
 public class Storage {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private ObjectMapper mapper = new ObjectMapper();
 
-    /* uncomment to switch to field mapping
-    static {
-        MAPPER.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.NONE);
-        MAPPER.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-    } */
     private final Set<Class<?>> types;
     private final Set<Method> methods;
     private final List<Plugin> plugins;
@@ -24,6 +20,10 @@ public class Storage {
         types = new HashSet<>();
         methods = new HashSet<>();
         this.plugins = Arrays.asList(plugins);
+    }
+
+    public void setMapper(ObjectMapper mapper) {
+        this.mapper = mapper;
     }
 
     /**
@@ -79,13 +79,11 @@ public class Storage {
         if (!types.contains(type)) {
             types.add(type);
 
-            var javaType = MAPPER.getTypeFactory().constructType(type);
-            var beanDescription = MAPPER.getSerializationConfig().introspect(javaType);
-            var properties = beanDescription.findProperties();
-
-            for (var property : properties) {
-                process(property.getRawPrimaryType());
-            }
+            var javaType = mapper.getTypeFactory().constructType(type);
+            var beanDescription = mapper.getSerializationConfig().introspect(javaType);
+            beanDescription.findProperties().stream()
+                    .map(BeanPropertyDefinition::getRawPrimaryType)
+                    .forEach(this::process);
         }
 
         return type;
@@ -130,8 +128,8 @@ public class Storage {
 
     public List<String> describeTypes() {
         return types.stream().map(type -> {
-            var javaType = MAPPER.getTypeFactory().constructType(type);
-            var beanDescription = MAPPER.getSerializationConfig().introspect(javaType);
+            var javaType = mapper.getTypeFactory().constructType(type);
+            var beanDescription = mapper.getSerializationConfig().introspect(javaType);
 
             var propList = beanDescription.findProperties().stream()
                     .map(prop -> {
