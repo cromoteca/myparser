@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.hilla.myparser.example.ExampleClientData;
 import dev.hilla.myparser.example.ExampleServerData;
 import dev.hilla.myparser.plugins.AddToStorage;
+import dev.hilla.myparser.plugins.FindConvertedClasses;
 import dev.hilla.myparser.plugins.SkipJavaItems;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -23,6 +24,7 @@ public class MyParserTest {
             "customMessage[text: String]: String",
             "defaultMessage[]: String",
             "getData[]: ExampleClientData",
+            "getImageContainer[]: ExampleConverted",
             "setData[data: ExampleClientData]: void"
     );
 
@@ -30,8 +32,9 @@ public class MyParserTest {
     public void testParseUsingDefaultJacksonConfiguration() throws Exception {
         testWithObjectMapper(null, EXPECTED_METHODS, List.of(
                 "ExampleClientData[value: ExampleEntity]",
+                "ExampleConverted[image: String]",
                 "ExampleEntity[data: ExampleType, exampleObject: ExampleType, importance: int, name: String]",
-                "ExampleType[value: int]"
+                "ExampleType[beautifulName: String, value: int]"
         ));
     }
 
@@ -42,8 +45,9 @@ public class MyParserTest {
         mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
         testWithObjectMapper(mapper, EXPECTED_METHODS, List.of(
                 "ExampleClientData[value: ExampleEntity]",
+                "ExampleConverted[image: String]",
                 "ExampleEntity[data: ExampleType]",
-                "ExampleType[negativeValue: Integer]"
+                "ExampleType[beautifulName: String, negativeValue: Integer]"
         ));
     }
 
@@ -51,6 +55,7 @@ public class MyParserTest {
             List<String> expectedTypes) throws Exception {
         var storage = new Storage(
                 new ReplacerPlugin(),
+                new FindConvertedClasses(),
                 new SkipJavaItems(),
                 new AddToStorage()
         );
@@ -62,7 +67,7 @@ public class MyParserTest {
         var scanner = new ClassPathScanningCandidateComponentProvider(false);
         scanner.addIncludeFilter(new AnnotationTypeFilter(Endpoint.class));
 
-        scanner.findCandidateComponents(getClass().getPackageName()).stream()
+        scanner.findCandidateComponents("").stream()
                 .map(this::getClassFromBeanDefinition)
                 .flatMap(c -> Arrays.stream(c.getMethods()))
                 .filter(m -> (m.getModifiers() & Modifier.PUBLIC) != 0)

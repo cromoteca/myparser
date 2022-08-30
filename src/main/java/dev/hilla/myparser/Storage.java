@@ -26,6 +26,10 @@ public class Storage {
         this.mapper = mapper;
     }
 
+    public ObjectMapper getMapper() {
+        return mapper;
+    }
+
     /**
      * Lets plugins process a method.
      */

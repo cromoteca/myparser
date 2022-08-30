@@ -16,7 +16,11 @@ public class SkipJavaItems implements Plugin {
 
     @Override
     public Class<?> process(Class<?> type, Storage storage) {
-        return type.isPrimitive() || type.getName().startsWith("java.") ? null : type;
+        return checkType(type.isArray() ? type.getComponentType() : type) ? null : type;
+    }
+
+    private static boolean checkType(Class<?> type) {
+        return type.isPrimitive() || type.getName().startsWith("java.");
     }
 
 }

@@ -19,7 +19,7 @@ public class ExampleEndpoint {
     }
 
     public ExampleServerData getData() {
-        return new ExampleServerData(new ExampleEntity());
+        return new ExampleServerData(new ExampleEntity(), new ExampleEntity());
     }
 
     public void setData(ExampleServerData data) {
@@ -27,5 +27,9 @@ public class ExampleEndpoint {
 
     public ExampleType add(ExampleType n1, ExampleType n2) {
         return new ExampleType(n1.getValue() + n2.getValue());
+    }
+
+    public ExampleConverted getImageContainer() {
+        return new ExampleConverted();
     }
 }
