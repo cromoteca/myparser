@@ -24,7 +24,7 @@ public class MyParserTest {
             "customMessage[text: String]: String",
             "defaultMessage[]: String",
             "getData[]: ExampleClientData",
-            "getImageContainer[]: ExampleConverted",
+            "getImageContainer[]: ImageURL",
             "setData[data: ExampleClientData]: void"
     );
 
@@ -32,9 +32,9 @@ public class MyParserTest {
     public void testParseUsingDefaultJacksonConfiguration() throws Exception {
         testWithObjectMapper(null, EXPECTED_METHODS, List.of(
                 "ExampleClientData[value: ExampleEntity]",
-                "ExampleConverted[image: String]",
                 "ExampleEntity[data: ExampleType, exampleObject: ExampleType, importance: int, name: String]",
-                "ExampleType[beautifulName: String, value: int]"
+                "ExampleType[beautifulName: String, value: int]",
+                "ImageURL[imageURL: String]"
         ));
     }
 
@@ -45,9 +45,9 @@ public class MyParserTest {
         mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
         testWithObjectMapper(mapper, EXPECTED_METHODS, List.of(
                 "ExampleClientData[value: ExampleEntity]",
-                "ExampleConverted[image: String]",
                 "ExampleEntity[data: ExampleType]",
-                "ExampleType[beautifulName: String, negativeValue: Integer]"
+                "ExampleType[beautifulName: String, negativeValue: Integer]",
+                "ImageURL[imageURL: String]"
         ));
     }
 

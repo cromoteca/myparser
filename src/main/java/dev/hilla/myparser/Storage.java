@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Storage {
 
@@ -124,10 +125,10 @@ public class Storage {
                 var type = find(param.getType()).getSimpleName();
                 var name = param.getName();
                 return String.format("%s: %s", name, type);
-            }).toList();
+            }).collect(Collectors.toList());
 
             return String.format("%s%s: %s", method.getName(), paramList, returnType);
-        }).sorted().toList();
+        }).sorted().collect(Collectors.toList());
     }
 
     public List<String> describeTypes() {
@@ -140,9 +141,9 @@ public class Storage {
                         var propType = prop.getRawPrimaryType().getSimpleName();
                         var name = prop.getName();
                         return String.format("%s: %s", name, propType);
-                    }).sorted().toList();
+                    }).sorted().collect(Collectors.toList());
 
             return String.format("%s%s", type.getSimpleName(), propList);
-        }).sorted().toList();
+        }).sorted().collect(Collectors.toList());
     }
 }
